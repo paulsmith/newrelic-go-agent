@@ -91,6 +91,15 @@ func BeginDatastoreSegment(
 	return int64(id)
 }
 
+func BeginExternalSegment(txnID int64, parentID int64, host string, name string) int64 {
+	chost := C.CString(host)
+	defer C.free(unsafe.Pointer(chost))
+	cname := C.CString(name)
+	defer C.free(unsafe.Pointer(cname))
+	id := C.newrelic_segment_external_begin(C.long(txnID), C.long(parentID), chost, cname)
+	return int64(id)
+}
+
 func EndSegment(txnID int64, parentID int64) error {
 	rv := C.newrelic_segment_end(C.long(txnID), C.long(parentID))
 	return nrError(rv, "end segment")
