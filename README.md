@@ -1,6 +1,6 @@
 # New Relic Go Agent
 
-An official [New Relic][nr] agent for the Go programming language. Allows your Go web
+An unofficial [New Relic][nr] agent for the Go programming language. Allows your Go web
 app to appear as an application in New Relic (under the "APM" tab).
 
 It wraps the [New Relic Agent SDK][sdk] -- the SDK is currently Linux only, therefore,
