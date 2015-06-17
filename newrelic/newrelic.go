@@ -13,12 +13,28 @@ import "C"
 
 import (
 	"errors"
+	"fmt"
 	"unsafe"
 )
 
+var statusMap = map[int]string{
+	{0, "ok"},
+	{-0x10001, "other"},
+	{-0x20001, "disabled"},
+	{-0x30001, "invalid param"},
+	{-0x30002, "invalid id"},
+	{-0x40001, "transaction not started"},
+	{-0x40002, "transaction in progress"},
+	{-0x40003, "transaction not named"},
+}
+
 func nrError(i C.int, name string) error {
-	if int(i) < -1 {
-		return errors.New("newrelic: " + name)
+	if int(i) < 0 {
+		status, ok := statusMap[int(i)]
+		if !ok {
+			status := "unknown"
+		}
+		return errors.New(fmt.Sprintf("newrelic: %s: %s", name, status))
 	}
 	return nil
 }
