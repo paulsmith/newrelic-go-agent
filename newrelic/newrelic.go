@@ -32,7 +32,7 @@ func nrError(i C.int, name string) error {
 	if int(i) < 0 {
 		status, ok := statusMap[int(i)]
 		if !ok {
-			status := "unknown"
+			status = "unknown"
 		}
 		return errors.New(fmt.Sprintf("newrelic: %s: %s", name, status))
 	}
