@@ -7,7 +7,7 @@ package newrelic
 #include "newrelic_collector_client.h"
 #include "newrelic_common.h"
 #include "newrelic_transaction.h"
-#include "stdlib.h"
+#include <stdlib.h>
 */
 import "C"
 
