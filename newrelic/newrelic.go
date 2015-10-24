@@ -13,7 +13,6 @@ import "C"
 
 import (
 	"errors"
-	"fmt"
 	"unsafe"
 )
 
@@ -28,13 +27,18 @@ var statusMap = map[int]string{
 	-0x40003: "transaction not named",
 }
 
+const (
+	AUTOSCOPE    = 1
+	ROOT_SEGMENT = 0
+)
+
 func nrError(i C.int, name string) error {
-	if int(i) < 0 {
+	if int(i) < -1 {
 		status, ok := statusMap[int(i)]
 		if !ok {
 			status = "unknown"
 		}
-		return errors.New(fmt.Sprintf("newrelic: %s: %s", name, status))
+		return errors.New("newrelic: " + name + ": " + status)
 	}
 	return nil
 }
@@ -128,6 +132,11 @@ func SetTransactionRequestURL(txnID int64, url string) error {
 	return nrError(rv, "set transaction request url")
 }
 
+func SetWebTransaction(txnID int64) error {
+	rv := C.newrelic_transaction_set_type_web(C.long(txnID))
+	return nrError(rv, "set web transaction")
+}
+
 func EndTransaction(txnID int64) error {
 	rv := C.newrelic_transaction_end(C.long(txnID))
 	return nrError(rv, "end transaction")
@@ -138,4 +147,26 @@ func RecordMetric(name string, val float64) error {
 	defer C.free(unsafe.Pointer(cname))
 	rv := C.newrelic_record_metric(cname, C.double(val))
 	return nrError(rv, "record metric")
+}
+
+func NoticeError(txnID int64, typ string, msg string, stackTrace string, delim string) error {
+	ctyp := C.CString(typ)
+	defer C.free(unsafe.Pointer(ctyp))
+	cmsg := C.CString(msg)
+	defer C.free(unsafe.Pointer(cmsg))
+	cstackTrace := C.CString(stackTrace)
+	defer C.free(unsafe.Pointer(cstackTrace))
+	cdelim := C.CString(delim)
+	defer C.free(unsafe.Pointer(cdelim))
+	rv := C.newrelic_transaction_notice_error(C.long(txnID), ctyp, cmsg, cstackTrace, cdelim)
+	return nrError(rv, "notice error")
+}
+
+func AddAttribute(txnID int64, name string, value string) error {
+	cname := C.CString(name)
+	defer C.free(unsafe.Pointer(cname))
+	cvalue := C.CString(value)
+	defer C.free(unsafe.Pointer(cvalue))
+	rv := C.newrelic_transaction_add_attribute(C.long(txnID), cname, cvalue)
+	return nrError(rv, "add attribute")
 }
